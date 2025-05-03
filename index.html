@@ -234,59 +234,59 @@
         <textarea id="message" name="message" placeholder="Ваше запитання..." required></textarea>
     </section>
 
-    <script>
-        (function() {
-            let currentNode = document.body;
-            let history = [];
+<script>
+    let currentNode = document.body;
+    let history = [];
 
-            function traverse(node) {
-                if (!node) {
-                    alert("Досягнуто кінця DOM.");
-                    return;
+    function traverse(node) {
+        if (!node) {
+            alert("Досягнуто кінця DOM.");
+            return;
+        }
+
+        let info = node.nodeType === 1 ? `<${node.tagName.toLowerCase()}>` : node.nodeName;
+        let message = `Зараз на вузлі: ${info}\n\nЩо бажаєте зробити?`;
+
+        let choice = prompt(`${message}\n1. Йти далі\n2. Повернутись\n3. Завершити`, "1");
+
+        switch (choice) {
+            case "1":
+                history.push(node);
+                let next = node.firstElementChild || node.nextElementSibling;
+                if (!next) {
+                    let parent = node.parentElement;
+                    while (parent && !parent.nextElementSibling) {
+                        parent = parent.parentElement;
+                    }
+                    next = parent ? parent.nextElementSibling : null;
                 }
-
-                let info = node.nodeType === 1 ? `<${node.tagName.toLowerCase()}>` : node.nodeName;
-                let message = `Зараз на вузлі: ${info}\n\nЩо бажаєте зробити?`;
-
-                let options = ["Йти далі", "Повернутись", "Завершити"];
-                let choice = prompt(`${message}\n1. ${options[0]}\n2. ${options[1]}\n3. ${options[2]}`, "1");
-
-                switch (choice) {
-                    case "1":
-                        history.push(node);
-                        let next = node.firstElementChild || node.nextElementSibling;
-                        if (!next) {
-                            let parent = node.parentElement;
-                            while (parent && !parent.nextElementSibling) {
-                                parent = parent.parentElement;
-                            }
-                            next = parent ? parent.nextElementSibling : null;
-                        }
-                        traverse(next);
-                        break;
-                    case "2":
-                        let prev = history.pop();
-                        if (prev) {
-                            traverse(prev);
-                        } else {
-                            alert("Немає попереднього вузла.");
-                            traverse(node);
-                        }
-                        break;
-                    case "3":
-                        alert("Обхід завершено.");
-                        break;
-                    default:
-                        alert("Невірний вибір.");
-                        traverse(node);
-                        break;
+                traverse(next);
+                break;
+            case "2":
+                let prev = history.pop();
+                if (prev) {
+                    traverse(prev);
+                } else {
+                    alert("Немає попереднього вузла.");
+                    traverse(node);
                 }
-            }
+                break;
+            case "3":
+                alert("Обхід завершено.");
+                break;
+            default:
+                alert("Невірний вибір.");
+                traverse(node);
+                break;
+        }
+    }
 
-            window.addEventListener("load", function() {
-                setTimeout(() => traverse(currentNode), 500);
-            });
-        })();
-    </script>
+    function startDomTraversal() {
+        history = [];
+        currentNode = document.body;
+        traverse(currentNode);
+    }
+</script>
+
 </body>
 </html>
