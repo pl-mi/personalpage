@@ -235,58 +235,81 @@
     </section>
 
 <script>
-    let currentNode = document.body;
-    let history = [];
-
-    function traverse(node) {
-        if (!node) {
-            alert("Досягнуто кінця DOM.");
-            return;
-        }
-
-        let info = node.nodeType === 1 ? `<${node.tagName.toLowerCase()}>` : node.nodeName;
-        let message = `Зараз на вузлі: ${info}\n\nЩо бажаєте зробити?`;
-
-        let choice = prompt(`${message}\n1. Йти далі\n2. Повернутись\n3. Завершити`, "1");
-
-        switch (choice) {
-            case "1":
-                history.push(node);
-                let next = node.firstElementChild || node.nextElementSibling;
-                if (!next) {
-                    let parent = node.parentElement;
-                    while (parent && !parent.nextElementSibling) {
-                        parent = parent.parentElement;
-                    }
-                    next = parent ? parent.nextElementSibling : null;
-                }
-                traverse(next);
-                break;
-            case "2":
-                let prev = history.pop();
-                if (prev) {
-                    traverse(prev);
-                } else {
-                    alert("Немає попереднього вузла.");
-                    traverse(node);
-                }
-                break;
-            case "3":
-                alert("Обхід завершено.");
-                break;
-            default:
-                alert("Невірний вибір.");
-                traverse(node);
-                break;
-        }
-    }
+    window.onload = function () {
+        startDomTraversal();
+    };
 
     function startDomTraversal() {
-        history = [];
-        currentNode = document.body;
-        traverse(currentNode);
+        if (!confirm("Почати обхід?")) return;
+
+        let currentNode = document.body;
+        const overlay = document.createElement("div");
+        const highlight = document.createElement("div");
+        let history = [];
+
+        overlay.style.position = "fixed";
+        overlay.style.bottom = "10px";
+        overlay.style.left = "10px";
+        overlay.style.zIndex = "9999";
+        overlay.innerHTML = `
+            <button id="nextBtn">Наступний вузол</button>
+            <button id="backBtn">Назад</button>
+            <button id="exitBtn">Вихід</button>
+        `;
+        document.body.appendChild(overlay);
+
+        highlight.style.position = "absolute";
+        highlight.style.border = "2px dashed red";
+        highlight.style.pointerEvents = "none";
+        highlight.style.zIndex = "9998";
+        document.body.appendChild(highlight);
+
+        function updateHighlight(node) {
+            const rect = node.getBoundingClientRect();
+            highlight.style.top = `${rect.top + window.scrollY}px`;
+            highlight.style.left = `${rect.left + window.scrollX}px`;
+            highlight.style.width = `${rect.width}px`;
+            highlight.style.height = `${rect.height}px`;
+        }
+
+        function getNextNode(node) {
+            if (node.firstElementChild) return node.firstElementChild;
+            while (node && !node.nextElementSibling) {
+                node = node.parentElement;
+            }
+            return node ? node.nextElementSibling : null;
+        }
+
+        updateHighlight(currentNode);
+
+        document.getElementById("nextBtn").onclick = () => {
+            history.push(currentNode);
+            const next = getNextNode(currentNode);
+            if (next) {
+                currentNode = next;
+                updateHighlight(currentNode);
+            } else {
+                alert("Це останній вузол.");
+            }
+        };
+
+        document.getElementById("backBtn").onclick = () => {
+            if (history.length > 0) {
+                currentNode = history.pop();
+                updateHighlight(currentNode);
+            } else {
+                alert("Немає попереднього вузла.");
+            }
+        };
+
+        document.getElementById("exitBtn").onclick = () => {
+            overlay.remove();
+            highlight.remove();
+        };
     }
 </script>
+
+
 
 </body>
 </html>
