@@ -185,12 +185,9 @@
             </div>
         </div>
 
-
-            </div>
-            <div class="links-section">
-                <a href="https://drive.google.com/drive/folders/1P_HT9tmB8ErpB3ldon43uzotQXOplcn0" target="_blank">Усі сертифікати</a>
-                <a href="https://drive.google.com/file/d/1REAPOHEQFfLr2nUF5np_LLbwGoaGRjNh/view" target="_blank">Основні наукові та навчально-методичні праці</a>
-            </div>
+        <div class="links-section">
+            <a href="https://drive.google.com/drive/folders/1P_HT9tmB8ErpB3ldon43uzotQXOplcn0" target="_blank">Усі сертифікати</a>
+            <a href="https://drive.google.com/file/d/1REAPOHEQFfLr2nUF5np_LLbwGoaGRjNh/view" target="_blank">Основні наукові та навчально-методичні праці</a>
         </div>
     </section>
 
@@ -237,7 +234,67 @@
         <input type="email" name="email" placeholder="Email" required>
         <textarea id="message" name="message" placeholder="Ваше запитання..." required></textarea>
     </section>
+
+    <!-- DOM traversal script -->
+    <script>
+        function traverseDOM(node, callback) {
+            callback(node, function (direction) {
+                if (direction === 'next') {
+                    if (node.firstElementChild) {
+                        traverseDOM(node.firstElementChild, callback);
+                    } else if (node.nextElementSibling) {
+                        traverseDOM(node.nextElementSibling, callback);
+                    } else {
+                        let parent = node.parentElement;
+                        while (parent && !parent.nextElementSibling) {
+                            parent = parent.parentElement;
+                        }
+                        if (parent && parent.nextElementSibling) {
+                            traverseDOM(parent.nextElementSibling, callback);
+                        } else {
+                            alert("Це був останній вузол. Завершено.");
+                        }
+                    }
+                } else if (direction === 'back') {
+                    if (node.parentElement) {
+                        traverseDOM(node.parentElement, callback);
+                    } else {
+                        alert("Це кореневий елемент. Назад не можна.");
+                    }
+                } else {
+                    alert("Завершено.");
+                }
+            });
+        }
+
+        function startTraversal() {
+            traverseDOM(document.body, function (node, next) {
+                const info = `Поточний вузол: <${node.nodeName.toLowerCase()}>\nВміст: ${node.textContent.trim().slice(0, 100)}`;
+                if (confirm(info + "\n\nПерейти до наступного вузла?")) {
+                    next('next');
+                } else if (confirm("Повернутись до попереднього вузла?")) {
+                    next('back');
+                } else {
+                    next('exit');
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const btn = document.createElement('button');
+            btn.textContent = "🔍 Почати перегляд DOM";
+            btn.style.position = 'fixed';
+            btn.style.bottom = '10px';
+            btn.style.right = '10px';
+            btn.style.padding = '10px 20px';
+            btn.style.backgroundColor = '#003366';
+            btn.style.color = 'white';
+            btn.style.border = 'none';
+            btn.style.borderRadius = '5px';
+            btn.style.cursor = 'pointer';
+            btn.onclick = startTraversal;
+            document.body.appendChild(btn);
+        });
+    </script>
 </body>
 </html>
-
-
