@@ -184,7 +184,6 @@
                 <p>Доцент кафедри комп’ютерних наук та інженерії програмного забезпечення УМСФ</p>
             </div>
         </div>
-
         <div class="links-section">
             <a href="https://drive.google.com/drive/folders/1P_HT9tmB8ErpB3ldon43uzotQXOplcn0" target="_blank">Усі сертифікати</a>
             <a href="https://drive.google.com/file/d/1REAPOHEQFfLr2nUF5np_LLbwGoaGRjNh/view" target="_blank">Основні наукові та навчально-методичні праці</a>
@@ -235,66 +234,59 @@
         <textarea id="message" name="message" placeholder="Ваше запитання..." required></textarea>
     </section>
 
-    <!-- DOM traversal script -->
     <script>
-        function traverseDOM(node, callback) {
-            callback(node, function (direction) {
-                if (direction === 'next') {
-                    if (node.firstElementChild) {
-                        traverseDOM(node.firstElementChild, callback);
-                    } else if (node.nextElementSibling) {
-                        traverseDOM(node.nextElementSibling, callback);
-                    } else {
-                        let parent = node.parentElement;
-                        while (parent && !parent.nextElementSibling) {
-                            parent = parent.parentElement;
+        (function() {
+            let currentNode = document.body;
+            let history = [];
+
+            function traverse(node) {
+                if (!node) {
+                    alert("Досягнуто кінця DOM.");
+                    return;
+                }
+
+                let info = node.nodeType === 1 ? `<${node.tagName.toLowerCase()}>` : node.nodeName;
+                let message = `Зараз на вузлі: ${info}\n\nЩо бажаєте зробити?`;
+
+                let options = ["Йти далі", "Повернутись", "Завершити"];
+                let choice = prompt(`${message}\n1. ${options[0]}\n2. ${options[1]}\n3. ${options[2]}`, "1");
+
+                switch (choice) {
+                    case "1":
+                        history.push(node);
+                        let next = node.firstElementChild || node.nextElementSibling;
+                        if (!next) {
+                            let parent = node.parentElement;
+                            while (parent && !parent.nextElementSibling) {
+                                parent = parent.parentElement;
+                            }
+                            next = parent ? parent.nextElementSibling : null;
                         }
-                        if (parent && parent.nextElementSibling) {
-                            traverseDOM(parent.nextElementSibling, callback);
+                        traverse(next);
+                        break;
+                    case "2":
+                        let prev = history.pop();
+                        if (prev) {
+                            traverse(prev);
                         } else {
-                            alert("Це був останній вузол. Завершено.");
+                            alert("Немає попереднього вузла.");
+                            traverse(node);
                         }
-                    }
-                } else if (direction === 'back') {
-                    if (node.parentElement) {
-                        traverseDOM(node.parentElement, callback);
-                    } else {
-                        alert("Це кореневий елемент. Назад не можна.");
-                    }
-                } else {
-                    alert("Завершено.");
+                        break;
+                    case "3":
+                        alert("Обхід завершено.");
+                        break;
+                    default:
+                        alert("Невірний вибір.");
+                        traverse(node);
+                        break;
                 }
-            });
-        }
+            }
 
-        function startTraversal() {
-            traverseDOM(document.body, function (node, next) {
-                const info = `Поточний вузол: <${node.nodeName.toLowerCase()}>\nВміст: ${node.textContent.trim().slice(0, 100)}`;
-                if (confirm(info + "\n\nПерейти до наступного вузла?")) {
-                    next('next');
-                } else if (confirm("Повернутись до попереднього вузла?")) {
-                    next('back');
-                } else {
-                    next('exit');
-                }
+            window.addEventListener("load", function() {
+                setTimeout(() => traverse(currentNode), 500);
             });
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const btn = document.createElement('button');
-            btn.textContent = "🔍 Почати перегляд DOM";
-            btn.style.position = 'fixed';
-            btn.style.bottom = '10px';
-            btn.style.right = '10px';
-            btn.style.padding = '10px 20px';
-            btn.style.backgroundColor = '#003366';
-            btn.style.color = 'white';
-            btn.style.border = 'none';
-            btn.style.borderRadius = '5px';
-            btn.style.cursor = 'pointer';
-            btn.onclick = startTraversal;
-            document.body.appendChild(btn);
-        });
+        })();
     </script>
 </body>
 </html>
